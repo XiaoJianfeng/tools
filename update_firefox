@@ -1,0 +1,36 @@
+#!/bin/bash
+
+prefix=/home/program
+base_url="ftp://ftp.mozilla.org/pub/firefox/releases/latest"
+platform="linux-x86_64"  # {linux-x86_64, linux-i686, win32, mac}
+language="en-US"         # {en-US, zh-CN, ...}
+URL="${base_url}/${platform}/${language}/"
+example_url="ftp://ftp.mozilla.org/pub/firefox/releases/latest/linux-x86_64/en-US/firefox-30.0.tar.bz2"
+tmp_dir=/tmp/firefox.$$
+
+latest_version=$(basename $(lftp -e "ls /pub/firefox/releases/latest/linux-x86_64/en-US/; quit" ftp://ftp.mozilla.org | rev | cut -f 1 -d ' ' | rev | cut -f 2 -d '-') .tar.bz2)
+if [[ ! -z $(which firefox) ]]
+then
+    current_version=$(firefox --version | rev | cut -f 1 -d ' ' | rev)
+else
+    current_version=""
+fi
+
+if [[ "${current_version}" = "${latest_version}" ]]
+then
+    echo "current firefox is already the latest"
+    exit
+fi
+
+mkdir -p ${tmp_dir}
+cd ${tmp_dir}
+lftp -c "mirror ${URL} ."
+tar -jxf firefox*.tar.bz2
+
+rm -rf ${prefix}/share/firefox
+mv firefox ${prefix}/share/firefox
+rm ${prefix}/bin/firefox
+ln -s ${prefix}/share/firefox/firefox ${prefix}/bin/firefox
+rm -rf ${tmp_dir}
+
+
