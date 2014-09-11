@@ -9,14 +9,14 @@ example_url="ftp://ftp.mozilla.org/pub/firefox/releases/latest/linux-x86_64/en-U
 tmp_dir=/tmp/firefox.$$
 
 latest_version=$(basename $(lftp -e "ls /pub/firefox/releases/latest/linux-x86_64/en-US/; quit" ftp://ftp.mozilla.org | rev | cut -f 1 -d ' ' | rev | cut -f 2 -d '-') .tar.bz2)
-if [[ ! -z $(which firefox) ]]
+if [ ! -z $(which firefox) ]
 then
     current_version=$(firefox --version | rev | cut -f 1 -d ' ' | rev)
 else
     current_version=""
 fi
 
-if [[ "${current_version}" = "${latest_version}" ]]
+if [ "${current_version}" = "${latest_version}" ]
 then
     echo "current firefox is already the latest"
     exit
@@ -32,5 +32,3 @@ mv firefox ${prefix}/share/firefox
 rm ${prefix}/bin/firefox
 ln -s ${prefix}/share/firefox/firefox ${prefix}/bin/firefox
 rm -rf ${tmp_dir}
-
-
